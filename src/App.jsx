@@ -1,4 +1,5 @@
-import { Map } from './components/Map';
+import { Map } from './components/Map/Map';
+import './global/global.scss';
 
 export function App() {
   return (
