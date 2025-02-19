@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import style from './searchInput.module.scss';
+import { getMarker } from '../../utils/map';
 
 const API_KEY = process.env.REACT_APP_API_KEY;
 
-export const SearchInput = ({ setMarkers }) => {
-  const [query, setQuery] = useState('');
+export const SearchInput = ({ options, setOptions }) => {
+  const [query, setQuery] = useState('kaufland, pl');
   const [suggestions, setSuggestions] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const queryCache = useRef({});
@@ -34,9 +35,13 @@ export const SearchInput = ({ setMarkers }) => {
           location: item.location,
           data: item,
         }));
+        const suggestions = [];
+
+        items.forEach((item) => suggestions.push(getMarker(item)));
 
         queryCache.current[query] = items;
         setSuggestions(items);
+        setOptions({ ...options, suggestions });
       } catch (error) {
         alert(error);
       }
@@ -46,6 +51,8 @@ export const SearchInput = ({ setMarkers }) => {
   }, [query]);
 
   const handleSelect = (item) => {
+    const icon = getMarker(item);
+
     setShowDropdown(false);
   };
 
@@ -64,6 +71,7 @@ export const SearchInput = ({ setMarkers }) => {
           placeholder='Hledat'
         />
 
+        {/* Dropdown */}
         {showDropdown && suggestions.length > 0 && (
           <ul>
             {suggestions.map((item, index) => (
