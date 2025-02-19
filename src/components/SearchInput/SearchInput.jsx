@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import style from './searchInput.module.scss';
-import { getMarker } from '../../utils/map';
-
-const API_KEY = process.env.REACT_APP_API_KEY;
+import { fetchSuggestions } from '../../utils/map';
 
 export const SearchInput = ({ options, setOptions }) => {
   const [query, setQuery] = useState('kaufland, pl');
@@ -10,66 +8,71 @@ export const SearchInput = ({ options, setOptions }) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const queryCache = useRef({});
   const inputRef = useRef(null);
+  const dropdownRef = useRef(null);
 
+  // Fetch
   useEffect(() => {
-    if (query.length < 2) {
-      setSuggestions([]);
+    const cache = queryCache.current[query];
+
+    if (!showDropdown) return setOptions({ ...options, suggestions: [] });
+    if (query.length < 2) return setSuggestions([]);
+    if (cache) {
+      // If user didn't modify query -> show cached suggestions instead
+      setSuggestions(cache);
+      setOptions({ ...options, suggestions: cache });
 
       return;
     }
 
-    if (queryCache.current[query]) {
-      setSuggestions(queryCache.current[query]);
+    fetchSuggestions(query, queryCache, setSuggestions, setOptions, options);
+  }, [showDropdown, query]);
 
-      return;
-    }
-
-    const fetchSuggestions = async () => {
-      try {
-        const url = `https://api.mapy.cz/v1/suggest?lang=cs&limit=5&locality=cz&type=poi,regional.address&apikey=${API_KEY}&query=${query}`;
-        const response = await fetch(url);
-        const data = await response.json();
-
-        const items = data.items.map((item) => ({
-          label: item.name,
-          location: item.location,
-          data: item,
-        }));
-        const suggestions = [];
-
-        items.forEach((item) => suggestions.push(getMarker(item)));
-
-        queryCache.current[query] = items;
-        setSuggestions(items);
-        setOptions({ ...options, suggestions });
-      } catch (error) {
-        alert(error);
+  // When clicked outside -> close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowDropdown(false);
       }
     };
 
-    fetchSuggestions();
-  }, [query]);
+    document.addEventListener('mousedown', handleClickOutside);
 
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // On item select
   const handleSelect = (item) => {
-    const icon = getMarker(item);
+    const { lon, lat } = item.data.position;
+    const suggestions = options.suggestions.map((suggestion) =>
+      suggestion.id === item.id
+        ? { ...suggestion, radius: { ...suggestion.radius, active: true } }
+        : suggestion
+    );
 
+    setOptions({ ...options, center: [lat, lon], zoom: 16, suggestions });
     setShowDropdown(false);
   };
 
   return (
     <div className={style.cont}>
-      <div className={style.search}>
-        <input
-          ref={inputRef}
-          type='text'
-          value={query}
-          onChange={(e) => {
-            setQuery(e.target.value);
-            setShowDropdown(true);
-          }}
-          onFocus={() => setShowDropdown(true)}
-          placeholder='Hledat'
-        />
+      <div className={style.search} ref={dropdownRef}>
+        <div className={style.input}>
+          <input
+            ref={inputRef}
+            type='text'
+            value={query}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setShowDropdown(true);
+            }}
+            onFocus={() => setShowDropdown(true)}
+            placeholder='Hledat'
+          />
+
+          {query && <button onClick={() => setQuery('')}>x</button>}
+        </div>
 
         {/* Dropdown */}
         {showDropdown && suggestions.length > 0 && (

@@ -1,19 +1,56 @@
 import L from 'leaflet';
-import markerIcon from 'leaflet/dist/images/marker-icon.png';
-import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+import 'leaflet.awesome-markers';
+import 'leaflet.awesome-markers/dist/leaflet.awesome-markers.css';
+import { v4 } from 'uuid';
 
-export const getMarker = (item) => {
+const API_KEY = process.env.REACT_APP_API_KEY;
+
+export const getMarker = (item, color = 'blue') => {
   const { lon, lat } = item.data.position;
-  const leafletIcon = L.icon({
-    iconUrl: markerIcon,
-    shadowUrl: markerShadow,
-    iconSize: [25, 41],
-    iconAnchor: [12, 41], // Fix: use pixel values, not lat/lon
-    popupAnchor: [1, -34],
+
+  const leafletIcon = L.AwesomeMarkers.icon({
+    icon: 'map-marker',
+    markerColor: color,
+    prefix: 'fa',
   });
 
   return {
+    ...item,
     icon: leafletIcon,
-    position: [lat, lon], // Fix: Use [lat, lon] (not [lon, lat])
+    position: [lat, lon],
   };
+};
+
+export const fetchSuggestions = async (
+  query,
+  queryCache,
+  setSuggestions,
+  setOptions,
+  options
+) => {
+  try {
+    const url = `https://api.mapy.cz/v1/suggest?lang=cs&limit=5&locality=cz&type=poi,regional.address&apikey=${API_KEY}&query=${query}`;
+    const response = await fetch(url);
+    const data = await response.json();
+
+    const items = data.items.map((item) => ({
+      id: v4(),
+      label: item.name,
+      location: item.location,
+      data: item,
+      radius: {
+        active: false,
+        size: 350,
+      },
+    }));
+    const suggestions = [];
+
+    items.forEach((item) => suggestions.push(getMarker(item, 'purple')));
+
+    queryCache.current[query] = suggestions;
+    setSuggestions(suggestions);
+    setOptions({ ...options, suggestions });
+  } catch (error) {
+    alert(error);
+  }
 };
