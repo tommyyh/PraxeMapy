@@ -1,0 +1,81 @@
+.cont {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+
+  position: absolute;
+  z-index: 1000;
+  right: 2.2rem;
+  top: 1.5rem;
+}
+
+// Edit plane button
+.buttonRow {
+  display: flex;
+  align-items: center;
+
+  margin: 0.8rem 0 0 0;
+
+  button {
+    margin: 0 0 0 0.5rem;
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+  }
+}
+
+.editBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 3rem;
+  height: 3rem;
+
+  background: var(--accent);
+  color: #fff;
+  font-weight: 500;
+  font-size: 1.07rem;
+  border-radius: 0.3rem;
+  border: none;
+  transition: var(--transition);
+
+  &:hover {
+    opacity: 0.83;
+  }
+}
+
+.actionBtn,
+.revertBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 3rem;
+  height: 3rem;
+
+  font-weight: 500;
+  font-size: 1.07rem;
+  border-radius: 0.3rem;
+  border: none;
+  transition: var(--transition);
+
+  &:first-child {
+    background: #ff3535;
+  }
+
+  &:nth-child(3) {
+    background: #2afe3f;
+  }
+
+  &:hover {
+    opacity: 0.82;
+  }
+}
+
+.revertBtn {
+  background: #fff;
+  border: 2px solid var(--accent);
+}

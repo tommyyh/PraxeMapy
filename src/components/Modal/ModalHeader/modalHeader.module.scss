@@ -1,0 +1,21 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.close {
+  padding: 0.52rem 1.2rem;
+
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #fff;
+  border: none;
+  background: #ff2c2c;
+  border-radius: 0.3rem;
+  transition: var(--transition);
+
+  &:hover {
+    opacity: 0.76;
+  }
+}

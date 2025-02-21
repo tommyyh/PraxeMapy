@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import style from './searchInput.module.scss';
-import { fetchSuggestions } from '../../utils/map';
+import { fetchSuggestions, deleteQuery } from '../../../utils/map';
 
 export const SearchInput = ({ options, setOptions }) => {
-  const [query, setQuery] = useState('kaufland, pl');
+  const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const queryCache = useRef({});
@@ -14,18 +14,21 @@ export const SearchInput = ({ options, setOptions }) => {
   useEffect(() => {
     const cache = queryCache.current[query];
 
-    if (!showDropdown) return setOptions({ ...options, suggestions: [] });
-    if (query.length < 2) return setSuggestions([]);
+    if (query.length < 2)
+      return deleteQuery(
+        false,
+        setSuggestions,
+        setShowDropdown,
+        setOptions,
+        queryCache
+      );
     if (cache) {
-      // If user didn't modify query -> show cached suggestions instead
       setSuggestions(cache);
-      setOptions({ ...options, suggestions: cache });
-
-      return;
+      return setOptions({ ...options, suggestions: cache });
     }
 
     fetchSuggestions(query, queryCache, setSuggestions, setOptions, options);
-  }, [showDropdown, query]);
+  }, [query]);
 
   // When clicked outside -> close dropdown
   useEffect(() => {
@@ -56,36 +59,49 @@ export const SearchInput = ({ options, setOptions }) => {
   };
 
   return (
-    <div className={style.cont}>
-      <div className={style.search} ref={dropdownRef}>
-        <div className={style.input}>
-          <input
-            ref={inputRef}
-            type='text'
-            value={query}
-            onChange={(e) => {
-              setQuery(e.target.value);
-              setShowDropdown(true);
-            }}
-            onFocus={() => setShowDropdown(true)}
-            placeholder='Hledat'
-          />
+    <div className={style.search} ref={dropdownRef}>
+      <div className={style.input}>
+        <input
+          ref={inputRef}
+          type='text'
+          value={query}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setShowDropdown(true);
+          }}
+          onFocus={() => setShowDropdown(true)}
+          placeholder='Hledat'
+        />
 
-          {query && <button onClick={() => setQuery('')}>x</button>}
-        </div>
-
-        {/* Dropdown */}
-        {showDropdown && suggestions.length > 0 && (
-          <ul>
-            {suggestions.map((item, index) => (
-              <li key={index} onClick={() => handleSelect(item)}>
-                <b>{item.label}</b>
-                <div>{item.location}</div>
-              </li>
-            ))}
-          </ul>
+        {query && (
+          <button
+            onClick={() =>
+              deleteQuery(
+                true,
+                setSuggestions,
+                setShowDropdown,
+                setOptions,
+                queryCache,
+                setQuery
+              )
+            }
+          >
+            x
+          </button>
         )}
       </div>
+
+      {/* Dropdown */}
+      {showDropdown && suggestions.length > 0 && (
+        <ul>
+          {suggestions.map((item, index) => (
+            <li key={index} onClick={() => handleSelect(item)}>
+              <b>{item.label}</b>
+              <div>{item.location}</div>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 };

@@ -1,0 +1,38 @@
+.cont {
+  margin: 1.2rem 0 0 0;
+
+  input {
+    margin: 2rem 0 0 0;
+    height: 2rem;
+    width: 100%;
+  }
+
+  .submit,
+  .remove {
+    padding: 0.65rem 1.2rem;
+    margin: 2rem 0 0 0;
+
+    font-size: 0.94rem;
+    font-weight: 500;
+    color: #fff;
+    border: none;
+    border-radius: 0.3rem;
+    background: var(--accent);
+    transition: var(--transition);
+
+    &:hover {
+      opacity: 0.85;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  .remove {
+    margin: 0 0 0 0.9rem;
+
+    background: #ff3838;
+  }
+}

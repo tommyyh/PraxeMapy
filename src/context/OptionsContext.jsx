@@ -8,7 +8,9 @@ export const OptionsProvider = ({ children }) => {
     zoom: 8,
     center: center,
     markers: [],
+    polylines: [],
     suggestions: [],
+    radiuses: [],
   });
 
   return (

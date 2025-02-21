@@ -1,6 +1,7 @@
 import { useMap } from 'react-leaflet';
 import { useEffect } from 'react';
 
+// Update map dynamically
 export const MapUpdater = ({ center, zoom }) => {
   const map = useMap();
 

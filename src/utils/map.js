@@ -5,6 +5,7 @@ import { v4 } from 'uuid';
 
 const API_KEY = process.env.REACT_APP_API_KEY;
 
+// Get marker with item attributes
 export const getMarker = (item, color = 'blue') => {
   const { lon, lat } = item.data.position;
 
@@ -18,6 +19,20 @@ export const getMarker = (item, color = 'blue') => {
     ...item,
     icon: leafletIcon,
     position: [lat, lon],
+  };
+};
+
+// Get a simple marker
+export const getSimpleMarker = (position, color = 'red') => {
+  const leafletIcon = L.AwesomeMarkers.icon({
+    icon: 'map-marker',
+    markerColor: color,
+    prefix: 'fa',
+  });
+
+  return {
+    icon: leafletIcon,
+    position: position,
   };
 };
 
@@ -53,4 +68,20 @@ export const fetchSuggestions = async (
   } catch (error) {
     alert(error);
   }
+};
+
+// Delet query
+export const deleteQuery = (
+  deleteQuery = true,
+  setSuggestions,
+  setShowDropdown,
+  setOptions,
+  queryCache,
+  setQuery
+) => {
+  setSuggestions([]);
+  setShowDropdown(false);
+  setOptions((prev) => ({ ...prev, suggestions: [] }));
+  deleteQuery && setQuery('');
+  queryCache.current = {};
 };

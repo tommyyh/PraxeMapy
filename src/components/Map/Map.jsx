@@ -2,16 +2,24 @@ import React, { useContext } from 'react';
 import style from './map.module.scss';
 import { Circle, MapContainer, TileLayer } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import { SearchInput } from '../SearchInput/SearchInput';
+import { Controls } from '../Controls/Controls';
 import { OptionsContext } from '../../context/OptionsContext';
 import { MapUpdater } from '../../hooks/MapUpdater';
-import MarkerClusterGroup from 'react-leaflet-markercluster';
-import { Marker } from '../Marker/Marker';
-import Popup from '../Popup/Popup';
+import { MarkerClick } from '../MarkerClick/MarkerClick';
+import { RadiusClick } from '../RadiusClick/RadiusClick';
+import { ModalContext } from '../../context/ModalContext';
+import { DisplayPolylines } from './DisplayPolylines';
+import {
+  DisplaySuggestions,
+  DisplaySuggestionsRadius,
+} from './DisplaySuggestions';
+import { DisplayMarkers } from './DisplayMarkers';
+import { DisplayRadius } from './DisplayRadius';
 
 export const Map = () => {
   const { options, setOptions } = useContext(OptionsContext);
-  const { center, zoom, suggestions } = options;
+  const { modal, setModal } = useContext(ModalContext);
+  const { center, zoom, suggestions, markers, polylines, radiuses } = options;
 
   return (
     <div className={style.cont}>
@@ -25,40 +33,21 @@ export const Map = () => {
           url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
         />
 
-        {/* Update map dynamically */}
+        {/* Display components */}
         <MapUpdater center={center} zoom={zoom} />
+        <DisplaySuggestions suggestions={suggestions} />
+        <DisplaySuggestionsRadius suggestions={suggestions} />
+        <DisplayMarkers markers={markers} />
+        <DisplayPolylines polylines={polylines} />
+        <DisplayRadius radiuses={radiuses} setModal={setModal} modal={modal} />
 
-        {/* Display markers */}
-        {suggestions.length > 0 && (
-          <MarkerClusterGroup>
-            {suggestions.map((suggestion, index) => (
-              <Marker marker={suggestion} key={index}>
-                <Popup />
-              </Marker>
-            ))}
-          </MarkerClusterGroup>
-        )}
-
-        {suggestions.length > 0 &&
-          suggestions.map((suggestion, index) => {
-            const { radius, position } = suggestion;
-
-            return (
-              radius.active && (
-                <Circle
-                  key={index}
-                  center={position}
-                  radius={radius.size}
-                  color='red'
-                  fillColor='rgba(255, 0, 0, 0.2)'
-                  fillOpacity={0.3}
-                />
-              )
-            );
-          })}
+        {/* Listen for marker click */}
+        {modal.area.active && <MarkerClick area={modal.area} />}
+        {/* Listen for radius click */}
+        {modal.radius.active && <RadiusClick radius={modal.radius} />}
       </MapContainer>
 
-      <SearchInput options={options} setOptions={setOptions} />
+      <Controls options={options} setOptions={setOptions} />
     </div>
   );
 };
